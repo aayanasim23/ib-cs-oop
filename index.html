@@ -871,7 +871,7 @@ window.checkWritten=async function(){
   const fb=document.getElementById('feedbackBox'),ft=document.getElementById('fbTitle'),fbb=document.getElementById('fbBody');
   fb.className='feedback loading';ft.innerHTML='<span class="spinner"></span>Checking...';fbb.textContent='';fb.style.display='block';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
         system:`You are a concise Java OOP tutor for IB CS HL. First line must be exactly "CORRECT" or "NEEDS WORK". Then 2-3 sentences on what's right/wrong and a quick fix. For definitions: CORRECT if they capture the core idea. For code: ignore minor typos, focus on logic and structure. Max 80 words.`,
         messages:[{role:'user',content:`Task: ${q.prompt}\nAnswer:\n${code}`}]})});
