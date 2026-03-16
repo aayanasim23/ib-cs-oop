@@ -193,40 +193,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ══ SETUP SCREEN ══ -->
-<div id="setupScreen" style="display:none">
-  <div class="setup-screen">
-    <h1>One-time <span>Firebase</span> Setup</h1>
-    <p>Takes 5 minutes. After this your progress syncs automatically across every device — no keys, no copying, just sign in with Google.</p>
-
-    <div class="setup-steps">
-      <h3>Steps</h3>
-      <div class="step"><div class="step-num">1</div><p>Go to <code>console.firebase.google.com</code> and sign in with your Google account</p></div>
-      <div class="step"><div class="step-num">2</div><p>Click <code>Add project</code> → name it anything → disable Google Analytics → click Create</p></div>
-      <div class="step"><div class="step-num">3</div><p>In the left sidebar click <code>Build → Firestore Database</code> → Create database → Start in test mode → pick any location → Enable</p></div>
-      <div class="step"><div class="step-num">4</div><p>In left sidebar click <code>Authentication</code> → Get started → Google → Enable → Save</p></div>
-      <div class="step"><div class="step-num">5</div><p>Click the gear icon (Project Settings) → scroll down to "Your apps" → click the <code>&lt;/&gt;</code> web icon → register app (any name) → copy the <code>firebaseConfig</code> object</p></div>
-      <div class="step"><div class="step-num">6</div><p>Paste the config object below and click Save</p></div>
-    </div>
-
-    <div class="config-area">
-      <label>Paste your firebaseConfig object here</label>
-      <textarea class="config-input" id="configInput" placeholder='{
-  apiKey: "AIza...",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123"
-}'></textarea>
-    </div>
-
-    <div class="setup-error" id="setupError"></div>
-    <button class="btn-setup" onclick="saveConfig()">Save & Continue</button>
-    <button class="btn-skip-setup" onclick="skipSetup()">Skip for now — use local storage only</button>
-  </div>
-</div>
-
 <!-- ══ MAIN APP ══ -->
 <div class="screen" id="appScreen" style="display:none">
 
@@ -263,6 +229,14 @@
     <div class="menu-card-full" onclick="startMode('exam')">
       <div class="menu-icon">🎯</div>
       <div><h2>IB Paper 2 Style — Timed 20 min</h2><p>10 questions, countdown timer.</p></div>
+    </div>
+
+    <div class="menu-card-full" onclick="generateAIQuestions()" id="aiGenBtn" style="border-color:rgba(224,90,255,0.3)">
+      <div class="menu-icon">🤖</div>
+      <div>
+        <h2 style="color:var(--accent4)">Generate AI Questions</h2>
+        <p id="aiGenStatus">Needs API key in settings below. Generates 5 fresh questions you haven't seen.</p>
+      </div>
     </div>
 
     <!-- API KEY SETTINGS -->
@@ -330,7 +304,15 @@ window.signInGoogle = function() { window.showToast && window.showToast('Sign in
 window.signOutUser = function() { window.showToast && window.showToast('Sign in unavailable'); };
 
 function getSavedConfig() {
-  try { return JSON.parse(localStorage.getItem('oop_fb_config')); } catch(e) { return null; }
+  // Config hardcoded — no setup needed for anyone visiting the site
+  return {
+    apiKey: "AIzaSyBMbBeuvzeeTEhytfrK_UtDhEP8BZcKW-w",
+    authDomain: "javaoopstudy.firebaseapp.com",
+    projectId: "javaoopstudy",
+    storageBucket: "javaoopstudy.firebasestorage.app",
+    messagingSenderId: "414742106308",
+    appId: "1:414742106308:web:539e7b978a0bd3f845b991"
+  };
 }
 
 window.saveConfig = function() {
@@ -369,112 +351,99 @@ window.skipSetup = function() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  const savedConfig = getSavedConfig();
-  const skipped = localStorage.getItem('oop_fb_skipped');
-  if(!savedConfig && !skipped) {
-    document.getElementById('setupScreen').style.display = 'block';
-  } else if(skipped && !savedConfig) {
-    window.skipSetup();
-  }
-  // If savedConfig exists, Firebase module handles init
+  // Firebase is always configured — setup screen never shown
+  // Firebase module handles init automatically
 });
 </script>
 
-<!-- Firebase module — loads async, app works even if this fails -->
-<script type="module">
-(async () => {
+<!-- Firebase compat SDK via cdnjs — most reliable CDN, works everywhere -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.0/firebase-firestore-compat.min.js"></script>
+<script>
+(function() {
   try {
-    const savedConfig = (() => { try { return JSON.parse(localStorage.getItem('oop_fb_config')); } catch(e) { return null; } })();
-    if(!savedConfig) return; // no config, skip Firebase entirely
+    if(typeof firebase === 'undefined') throw new Error('Firebase SDK not loaded');
 
-    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-    const { getFirestore, doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    firebase.initializeApp({
+      apiKey: "AIzaSyBMbBeuvzeeTEhytfrK_UtDhEP8BZcKW-w",
+      authDomain: "javaoopstudy.firebaseapp.com",
+      projectId: "javaoopstudy",
+      storageBucket: "javaoopstudy.firebasestorage.app",
+      messagingSenderId: "414742106308",
+      appId: "1:414742106308:web:539e7b978a0bd3f845b991"
+    });
 
-    const app = initializeApp(savedConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     window.signInGoogle = async function() {
       try {
-        await signInWithPopup(auth, new GoogleAuthProvider());
-      } catch(e) { window.showToast('Sign in failed: ' + e.message); }
+        await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      } catch(e) { window.showToast && window.showToast('Sign in failed: ' + e.message); }
     };
 
     window.signOutUser = async function() {
-      await signOut(auth);
-      window.showToast('Signed out');
+      await auth.signOut();
+      window.showToast && window.showToast('Signed out');
       location.reload();
     };
 
     window.saveToFirestore = async function() {
       if(!window._fbUser) return;
       const el = document.getElementById('syncStatusTxt');
-      if(el) el.textContent = '⏳ syncing...';
+      if(el) el.textContent = 'syncing...';
       try {
-        await setDoc(doc(db, 'progress', window._fbUser.uid), window.progress);
-        if(el) el.textContent = '✓ synced';
+        await db.collection('progress').doc(window._fbUser.uid).set(window.progress);
+        if(el) el.textContent = 'synced';
       } catch(e) {
-        if(el) el.textContent = '⚠ offline';
+        if(el) el.textContent = 'offline';
       }
     };
 
-    onAuthStateChanged(auth, async user => {
+    auth.onAuthStateChanged(async user => {
       window._fbUser = user;
       const wrap = document.getElementById('userBarWrap');
       if(!wrap) return;
 
       if(user) {
-        // Load progress from Firestore
         try {
-          const snap = await getDoc(doc(db, 'progress', user.uid));
-          if(snap.exists()) {
+          const snap = await db.collection('progress').doc(user.uid).get();
+          if(snap.exists) {
             window.progress = snap.data();
             window.saveLocal && window.saveLocal();
-            // restore API key if synced
-            if(window.progress._apiKey) {
-              localStorage.setItem('oop_api_key', window.progress._apiKey);
-            }
+            if(window.progress._apiKey) localStorage.setItem('oop_api_key', window.progress._apiKey);
+            if(window.progress._provider) { window._provider = window.progress._provider; localStorage.setItem('oop_provider', window._provider); }
             window.loadApiKeyFromProgress && window.loadApiKeyFromProgress();
           }
-        } catch(e) {}
+        } catch(e) { console.log('Firestore load err:', e); }
 
-        wrap.innerHTML = `
-          <div class="user-bar">
-            <div class="user-info">
-              <div class="user-avatar">${user.photoURL ? `<img src="${user.photoURL}">` : (user.displayName||'?')[0]}</div>
-              <div>
-                <div class="user-name">${user.displayName||user.email}</div>
-                <div class="user-sub" id="syncStatusTxt">✓ synced</div>
-              </div>
-            </div>
-            <button class="btn-signout" onclick="signOutUser()">Sign out</button>
-          </div>`;
+        wrap.innerHTML = '<div class="user-bar"><div class="user-info"><div class="user-avatar">' +
+          (user.photoURL ? '<img src="'+user.photoURL+'">' : (user.displayName||'?')[0]) +
+          '</div><div><div class="user-name">' + (user.displayName||user.email) +
+          '</div><div class="user-sub" id="syncStatusTxt">synced</div></div></div>' +
+          '<button class="btn-signout" onclick="signOutUser()">Sign out</button></div>';
       } else {
-        wrap.innerHTML = `
-          <div class="signin-card">
-            <h3>Sign in to sync progress</h3>
-            <p>Your wrong answers, score, and streak follow you across every device automatically.</p>
-            <button class="btn-google" onclick="signInGoogle()">
-              <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-              Continue with Google
-            </button>
-            <br>
-            <button class="btn-anon" onclick="document.getElementById('userBarWrap').innerHTML=''">Continue without signing in</button>
-          </div>`;
+        wrap.innerHTML = '<div class="signin-card"><h3>Sign in to sync progress</h3>' +
+          '<p>Your wrong answers, score, and streak sync across every device.</p>' +
+          '<button class="btn-google" onclick="signInGoogle()">' +
+          '<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>' +
+          'Continue with Google</button><br>' +
+          '<button class="btn-anon" onclick="document.getElementById(\'userBarWrap\').innerHTML=\'\'">Continue without signing in</button></div>';
       }
 
-      document.getElementById('setupScreen').style.display = 'none';
       document.getElementById('appScreen').style.display = 'block';
       window.initApp && window.initApp();
     });
 
   } catch(e) {
     console.log('Firebase unavailable:', e.message);
-    // App already handles this via core script
+    document.getElementById('appScreen').style.display = 'block';
+    window.skipSetup && window.skipSetup();
   }
 })();
 </script>
+
 
 <script>
 // ═══════════════════════════════════════════════════
@@ -808,8 +777,13 @@ function render(){
   if(q.prompt) html+=`<div class="q-prompt">${q.prompt}</div>`;
 
   if(isMC&&q.options){
+    // Shuffle options, track where correct answer ends up
+    const optIndices = q.options.map((_,i)=>i);
+    for(let i=optIndices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[optIndices[i],optIndices[j]]=[optIndices[j],optIndices[i]];}
+    q._shuffledOptions = optIndices.map(i=>q.options[i]);
+    q._shuffledAnswer = optIndices.indexOf(q.answer);
     html+='<div class="mc-options" id="mcOptions">';
-    q.options.forEach((opt,i)=>{html+=`<button class="mc-option" onclick="pickMC(${i})" id="opt${i}"><span class="opt-letter">${String.fromCharCode(65+i)}</span>${opt}</button>`;});
+    q._shuffledOptions.forEach((opt,i)=>{html+=`<button class="mc-option" onclick="pickMC(${i})" id="opt${i}"><span class="opt-letter">${String.fromCharCode(65+i)}</span>${opt}</button>`;});
     html+='</div><div class="mc-explain" id="mcExplain"></div>';
   }
 
@@ -843,14 +817,15 @@ window.pickMC=function(idx){
   if(answered) return;
   answered=true;
   const q=pool[current];
+  const correctIdx = q._shuffledAnswer !== undefined ? q._shuffledAnswer : q.answer;
   document.querySelectorAll('.mc-option').forEach((btn,i)=>{
     btn.classList.add('locked');
-    if(i===q.answer) btn.classList.add('correct');
-    else if(i===idx&&idx!==q.answer) btn.classList.add('wrong');
+    if(i===correctIdx) btn.classList.add('correct');
+    else if(i===idx&&idx!==correctIdx) btn.classList.add('wrong');
   });
   const ex=document.getElementById('mcExplain');
   if(ex){ex.style.display='block';ex.textContent='✓ '+q.explanation;}
-  if(idx===q.answer){if(!hintUsed)sessionScore++;else sessionScore+=0.5;markCorrect(q.id);}
+  if(idx===correctIdx){if(!hintUsed)sessionScore++;else sessionScore+=0.5;markCorrect(q.id);}
   else{markWrong(q.id);retryPool.push({...q,_retry:true});}
   updateStats();
   const nb=document.getElementById('btnNext');
@@ -1049,6 +1024,60 @@ window.addEventListener('DOMContentLoaded', function() {
   window._provider = localStorage.getItem('oop_provider') || 'openrouter';
   setTimeout(() => { window.selectProvider && window.selectProvider(window._provider); window.loadApiKeyFromProgress && window.loadApiKeyFromProgress(); }, 100);
 });
+
+window.generateAIQuestions=async function(){
+  const apiKey=localStorage.getItem('oop_api_key');
+  const statusEl=document.getElementById('aiGenStatus');
+  if(!apiKey){
+    if(statusEl) statusEl.textContent='Add an API key in settings below first.';
+    showToast('No API key — add one in settings');
+    return;
+  }
+  const btn=document.getElementById('aiGenBtn');
+  if(btn){btn.style.opacity='0.6';btn.style.pointerEvents='none';}
+  if(statusEl) statusEl.textContent='⏳ Generating 5 fresh questions...';
+
+  const concepts=['Inheritance','Method Overriding','Method Overloading','Encapsulation','Scope','Static vs Instance','Constructors','Getters and Setters','UML','Polymorphism'];
+  const picked=shuffle([...concepts]).slice(0,5);
+
+  const providerKey=localStorage.getItem('oop_provider')||'openrouter';
+  const providerCfg=PROVIDERS[providerKey]||PROVIDERS['openrouter'];
+  const sysPrompt=`You are generating Java OOP multiple choice questions for IB Computer Science HL students. Generate exactly 5 questions as a JSON array. Each question must have: id (string, start with "ai_"+timestamp), cat ("output" or "concept"), concept (string), title (string, max 8 words), prompt (optional, for concept questions), code (optional HTML-escaped code for output questions), options (array of exactly 4 strings, no A/B/C/D prefix), answer (0-3 integer index of correct option), explanation (string). Mix output-tracing and concept questions. Topics: ${picked.join(', ')}. For output questions show short Java code and ask what prints. Make questions different from typical textbook examples. Return ONLY valid JSON array, no markdown.`;
+  const userMsg=`Generate 5 IB CS Java OOP questions on: ${picked.join(', ')}`;
+  const msgs=[{role:'system',content:sysPrompt},{role:'user',content:userMsg}];
+
+  try{
+    const apiUrl=providerCfg.urlFn?providerCfg.urlFn(apiKey):(providerCfg.url||'');
+    const bodyData=providerCfg.body.length===2?providerCfg.body(msgs,apiKey):providerCfg.body(msgs);
+    const res=await fetch(apiUrl,{method:'POST',headers:providerCfg.headers(apiKey),body:bodyData});
+    const data=await res.json();
+    let text=providerCfg.parse(data);
+
+    // strip markdown code fences if any
+    text=text.replace(/```json|```/g,'').trim();
+    const questions=JSON.parse(text);
+    if(!Array.isArray(questions)||questions.length===0) throw new Error('Bad response');
+
+    // add to BANK and dedupe
+    let added=0;
+    questions.forEach(q=>{
+      if(q.id&&q.options&&q.options.length===4&&typeof q.answer==='number'){
+        if(!BANK.find(b=>b.id===q.id)){
+          BANK.push(q);
+          added++;
+        }
+      }
+    });
+
+    if(statusEl) statusEl.textContent=`✓ Added ${added} new questions! Run Full Mix to see them.`;
+    showToast(`+${added} AI questions added!`);
+  }catch(e){
+    if(statusEl) statusEl.textContent='Failed: '+e.message+'. Try again.';
+    showToast('Generation failed: '+e.message);
+  }finally{
+    if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
+  }
+}
 
 window.showToast=function(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
