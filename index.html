@@ -723,7 +723,7 @@ window.signInGoogle = async function() {
   try {
     await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href.split('?')[0] }
+      options: { redirectTo: 'https://aayanasim23.github.io/claude-ai---java-oop-study-IB-HL-CS-Y1/' }
     });
   } catch(e) { showToast('Sign in failed: ' + e.message); }
 };
