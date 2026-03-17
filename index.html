@@ -1326,7 +1326,7 @@ System.out.println(sp[<span class="num">0</span>].calcTotalSales());`,
    answer:1, explanation:'SalesPerson HAS-A Sales[] is aggregation/composition — one class holds objects of another as a field. UML: solid line with diamond (◆) at SalesPerson end. Different from IS-A (inheritance) which uses a hollow triangle arrow. 2017 Q14(c)(i).'},
 
   {id:'ib6',cat:'code',concept:'Complete constructor — IB 2017 Q14a',title:'IB 2017: complete SalesPerson constructor',
-   prompt:'Complete the constructor for SalesPerson. It takes String id and should initialize the instance variables.\n\npublic SalesPerson(String id)\n{\n    // code missing\n}',
+   prompt:'The SalesPerson class has these instance variables:\n\nprivate String id;\nprivate Sales[] salesHistory;\nprivate int count = 0;\n\nComplete the constructor below. It should initialize all instance variables. salesHistory should be an array of size 100.\n\npublic SalesPerson(String id)\n{\n    // code missing\n}',
    hint:'There are 3 instance variables: id (String), salesHistory (Sales[], size 100), count (int = 0)',
    solution:`public SalesPerson(String id)
 {
@@ -1336,7 +1336,7 @@ System.out.println(sp[<span class="num">0</span>].calcTotalSales());`,
 }`},
 
   {id:'ib7',cat:'code',concept:'calcTotalSales — IB 2017 Q14e',title:'IB 2017: calcTotalSales() method',
-   prompt:'Construct calcTotalSales() in SalesPerson. It calculates the total value of all sales. Each Sales object has getValue() (price per item) and getQuantity() (number sold). Use count to know how many sales exist.',
+   prompt:'SalesPerson has:\nprivate Sales[] salesHistory;\nprivate int count; // number of sales made\n\nSales has:\npublic double getValue()   // price per item\npublic int getQuantity()   // number of items sold\n\nTotal value of one sale = getValue() * getQuantity()\n\nConstruct calcTotalSales() which returns the total value of ALL sales for this salesperson:\n\npublic double calcTotalSales()\n{',
    hint:'total += salesHistory[i].getValue() * salesHistory[i].getQuantity()',
    solution:`public double calcTotalSales()
 {
@@ -1437,7 +1437,7 @@ System.out.println(c.getArrive().getMonth());`,
 }`},
 
   {id:'ib18',cat:'code',concept:'bill() with custom types — 2016 Q14e',title:'IB 2016: bill() using Dates.StayDays()',
-   prompt:'Construct bill() in the Client class. It should calculate and output:\n- client\'s name\n- room number\n- arrive date\n- leave date\n- total nights (use Dates.StayDays(arrive, leave))\n- total cost (nights × bedroom.getPrice())\n\npublic void bill() {',
+   prompt:'Client has these instance variables:\nprivate String name;\nprivate Dates arrive;\nprivate Dates leave;\nprivate Room bedroom;\n\nAvailable methods:\nDates.StayDays(Dates x, Dates y)  // static — returns int (number of nights)\nbedroom.getPrice()                 // returns double (price per night)\nbedroom.getRoomNumber()            // returns int\narrive.getDay(), arrive.getMonth() // return int\n\nConstruct bill() which calculates and outputs the full bill:\n\npublic void bill() {',
    hint:'int nights = Dates.StayDays(arrive, leave);\ndouble cost = nights * bedroom.getPrice();',
    solution:`public void bill() {
     int nights = Dates.StayDays(arrive, leave);
@@ -1451,7 +1451,7 @@ System.out.println(c.getArrive().getMonth());`,
 }`},
 
   {id:'ib19',cat:'code',concept:'GClient subclass — 2016 Q15a',title:'IB 2016: construct GClient class',
-   prompt:'GClient extends Client. It adds a private String groupName field.\nConstructor takes the same parameters as Client PLUS String gn.\nCall super() for all Client params, then set groupName.\n\npublic class GClient extends Client {',
+   prompt:'The Client class has this constructor:\n\npublic Client(int id, String c, Dates dateIn, Dates dateOut, Room r)\n\nGClient extends Client and adds one new field:\nprivate String groupName;\n\nConstruct the GClient class. Its constructor takes all the same parameters as Client PLUS String gn. Call super() for all Client params, then set groupName.\n\npublic class GClient extends Client {',
    hint:'super(id, c, dateIn, dateOut, r) must be FIRST in the constructor',
    solution:`public class GClient extends Client {
     private String groupName;
