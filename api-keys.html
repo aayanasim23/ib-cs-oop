@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Key Setup — IB CS OOP Terminal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080808; color: #c8c8c8; font-family: 'JetBrains Mono', 'Courier New', monospace; max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { color: #00ff41; font-size: 1.3rem; letter-spacing: 2px; margin-bottom: 6px; }
+  .sub { color: #555; font-size: 0.8rem; margin-bottom: 40px; }
+  h2 { color: #00ff41; font-size: 0.85rem; letter-spacing: 2px; margin: 36px 0 12px; }
+  p { font-size: 0.82rem; line-height: 1.7; color: #aaa; margin-bottom: 10px; }
+  .provider { background: #0e0e0e; border: 1px solid #1a1a1a; border-radius: 4px; padding: 20px 24px; margin-bottom: 16px; }
+  .provider-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 2px; letter-spacing: 1px; font-weight: 700; }
+  .free { background: rgba(0,255,65,0.1); color: #00ff41; border: 1px solid #00aa2b; }
+  .paid { background: rgba(255,170,0,0.1); color: #ffaa00; border: 1px solid #aa6600; }
+  .provider-name { color: #f0f0f0; font-size: 0.9rem; font-weight: 700; }
+  .steps { list-style: none; padding: 0; }
+  .steps li { font-size: 0.8rem; color: #aaa; padding: 4px 0 4px 16px; position: relative; line-height: 1.6; }
+  .steps li::before { content: '→'; position: absolute; left: 0; color: #00ff41; }
+  a { color: #5b9cf6; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .key-format { background: #141414; border: 1px solid #222; border-radius: 3px; padding: 8px 12px; font-size: 0.78rem; color: #00ff41; margin: 8px 0; letter-spacing: 1px; }
+  .rec { border-color: #00aa2b; }
+  .rec-label { font-size: 0.7rem; color: #00ff41; letter-spacing: 1px; margin-bottom: 8px; }
+  .back { display: inline-block; margin-top: 40px; color: #555; font-size: 0.8rem; text-decoration: none; letter-spacing: 1px; }
+  .back:hover { color: #00ff41; }
+  .note { background: rgba(255,170,0,0.05); border-left: 2px solid #ffaa00; padding: 10px 14px; font-size: 0.78rem; color: #aaa; margin: 12px 0; border-radius: 0 3px 3px 0; }
+</style>
+</head>
+<body>
+
+<h1>// API KEY SETUP</h1>
+<p class="sub">The AI grading feature requires a free API key. Takes 2 minutes. No credit card needed for the free options.</p>
+
+<div class="note">Your key is stored only in your browser (localStorage) and your personal Supabase account — never shared, never logged.</div>
+
+<!-- GROQ -->
+<div class="provider rec">
+  <div class="provider-header">
+    <span class="provider-name">Groq</span>
+    <span class="badge free">FREE</span>
+    <span style="font-size:0.75rem;color:#555">— recommended</span>
+  </div>
+  <p>Fastest inference of any free provider. 1000 requests/day. No credit card required.</p>
+  <ul class="steps">
+    <li>Go to <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
+    <li>Sign up with Google or email</li>
+    <li>Click <strong>API Keys</strong> in the left sidebar</li>
+    <li>Click <strong>Create API Key</strong> → give it any name → copy it</li>
+    <li>Paste into the app settings, select Groq, hit SAVE</li>
+  </ul>
+  <div class="key-format">gsk_...</div>
+</div>
+
+<!-- GEMINI -->
+<div class="provider">
+  <div class="provider-header">
+    <span class="provider-name">Gemini</span>
+    <span class="badge free">FREE</span>
+  </div>
+  <p>Google's model via AI Studio. Generous free tier. Requires a Google account.</p>
+  <ul class="steps">
+    <li>Go to <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></li>
+    <li>Sign in with Google</li>
+    <li>Click <strong>Get API Key</strong> (top left)</li>
+    <li>Click <strong>Create API key</strong> → copy it</li>
+    <li>Paste into the app settings, select Gemini, hit SAVE</li>
+  </ul>
+  <div class="key-format">AIza...</div>
+</div>
+
+<!-- OPENROUTER -->
+<div class="provider">
+  <div class="provider-header">
+    <span class="provider-name">OpenRouter</span>
+    <span class="badge free">FREE</span>
+  </div>
+  <p>Routes to multiple models. Free tier gives 50 requests/day with no card required.</p>
+  <ul class="steps">
+    <li>Go to <a href="https://openrouter.ai" target="_blank">openrouter.ai</a></li>
+    <li>Sign up → go to <strong>Keys</strong> in the dashboard</li>
+    <li>Click <strong>Create Key</strong> → copy it</li>
+    <li>Paste into the app settings, select OpenRouter, hit SAVE</li>
+  </ul>
+  <div class="key-format">sk-or-v1-...</div>
+</div>
+
+<!-- ANTHROPIC -->
+<div class="provider">
+  <div class="provider-header">
+    <span class="provider-name">Anthropic</span>
+    <span class="badge paid">PAID</span>
+  </div>
+  <p>Claude models. Requires a credit card and minimum $5 deposit. High quality grading.</p>
+  <ul class="steps">
+    <li>Go to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></li>
+    <li>Create account → add billing → go to <strong>API Keys</strong></li>
+    <li>Create key → copy it</li>
+    <li>Paste into the app settings, select Anthropic, hit SAVE</li>
+  </ul>
+  <div class="key-format">sk-ant-...</div>
+</div>
+
+<!-- OPENAI -->
+<div class="provider">
+  <div class="provider-header">
+    <span class="provider-name">OpenAI</span>
+    <span class="badge paid">PAID</span>
+  </div>
+  <p>GPT-4o mini. Requires a credit card. Cheap per request but not free.</p>
+  <ul class="steps">
+    <li>Go to <a href="https://platform.openai.com" target="_blank">platform.openai.com</a></li>
+    <li>Create account → add billing → go to <strong>API Keys</strong></li>
+    <li>Create key → copy it</li>
+    <li>Paste into the app settings, select OpenAI, hit SAVE</li>
+  </ul>
+  <div class="key-format">sk-...</div>
+</div>
+
+<a href="index.html" class="back">← back to app</a>
+
+</body>
+</html>

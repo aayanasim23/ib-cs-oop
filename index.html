@@ -572,7 +572,7 @@ button { font-family: 'JetBrains Mono', monospace; font-size: 11px; border: none
 
 <!-- Static content for Google crawler — hidden visually but readable by bots -->
 <div style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
-  <h1>Java OOP Practice</h1>
+  <h1>IB CS OOP Terminal</h1>
   <p>Java OOP Practice is a free study tool for IB Computer Science Higher Level students preparing for Paper 2 Option D — Object-Oriented Programming. The app provides 60+ exam-style questions covering inheritance, encapsulation, polymorphism, UML diagrams, constructors, static vs instance variables, and real past paper questions from 2016 and 2017. Features include AI-powered answer grading, a wrong-answer drill mode, anti-repetition question engine, and cross-device progress sync via Google sign-in.</p>
 </div>
 
@@ -1605,7 +1605,7 @@ window.loadApiKeyFromProgress = function() {
   const k = localStorage.getItem('oop_api_key');
   if(el) el.innerHTML = k
     ? `<span style="color:var(--green)">// ${PROVIDERS[window._provider]?.name||''} key active ✓</span>`
-    : `<span style="color:var(--muted)">// no key — free options: <a href="https://aistudio.google.com" target="_blank" style="color:#5b9cf6">Gemini</a> | <a href="https://console.groq.com" target="_blank" style="color:#5b9cf6">Groq</a> | <a href="https://openrouter.ai" target="_blank" style="color:#5b9cf6">OpenRouter</a></span>`;
+    : `<span style="color:var(--muted)">// no key — <a href="api-keys.html" target="_blank" style="color:#00ff41">setup guide</a> | free options: <a href="https://aistudio.google.com" target="_blank" style="color:#5b9cf6">Gemini</a> | <a href="https://console.groq.com" target="_blank" style="color:#5b9cf6">Groq</a> | <a href="https://openrouter.ai" target="_blank" style="color:#5b9cf6">OpenRouter</a></span>`;
 };
 
 // ═══════════════════════════════════════════════════════
