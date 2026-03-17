@@ -679,43 +679,58 @@ try {
 async function initAuth() {
   if(!sb) { showApp(); return; }
 
-  // Clean up OAuth token from URL without page reload
-  if(window.location.hash && window.location.hash.includes('access_token')) {
-    history.replaceState(null, '', window.location.pathname);
-  }
+  // Supabase v2 PKCE: after OAuth redirect, URL has ?code=...
+  // The client auto-exchanges it — we just need to wait for SIGNED_IN event
+  const isOAuthCallback = window.location.search.includes('code=') || 
+                          window.location.hash.includes('access_token');
 
-  // Listen for auth changes BEFORE getting session
-  // This fires on initial load if coming back from OAuth redirect
+  // Set up listener first — fires when PKCE exchange completes
   sb.auth.onAuthStateChange(async (event, session) => {
     if(event === 'SIGNED_IN' && session) {
       currentUser = session.user;
+      // Clean URL after successful sign in
+      if(window.location.search.includes('code=') || window.location.hash) {
+        history.replaceState(null, '', window.location.pathname);
+      }
       await loadFromSupabase();
       renderUserBar(session.user);
       updateMenuStats();
       loadApiKeyFromProgress();
-      // clean URL if needed
-      if(window.location.hash) history.replaceState(null, '', window.location.pathname);
+      // Show app if coming from OAuth callback
+      if(!document.getElementById('menuScreen').style.display || 
+         document.getElementById('menuScreen').style.display === 'none') {
+        showApp();
+      }
     } else if(event === 'SIGNED_OUT') {
       currentUser = null;
       renderSignIn();
-    } else if(event === 'TOKEN_REFRESHED') {
-      // silent — just update user
-      if(session) currentUser = session.user;
     }
   });
 
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if(session) {
-      currentUser = session.user;
-      await loadFromSupabase();
-      renderUserBar(session.user);
-    } else {
-      renderSignIn();
-    }
-  } catch(e) { renderSignIn(); }
-
-  showApp();
+  if(isOAuthCallback) {
+    // Coming back from Google — wait for onAuthStateChange to fire
+    // Show a loading state briefly
+    document.body.innerHTML += '<div id="authLoading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#080808;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:JetBrains Mono,monospace;color:#00ff41;letter-spacing:3px;font-size:13px;">// SIGNING IN...</div>';
+    // Give Supabase time to exchange the code, then show app
+    setTimeout(() => {
+      const el = document.getElementById('authLoading');
+      if(el) el.remove();
+      showApp();
+    }, 3000);
+  } else {
+    // Normal load — check existing session
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if(session) {
+        currentUser = session.user;
+        await loadFromSupabase();
+        renderUserBar(session.user);
+      } else {
+        renderSignIn();
+      }
+    } catch(e) { renderSignIn(); }
+    showApp();
+  }
 }
 
 window.signInGoogle = async function() {
